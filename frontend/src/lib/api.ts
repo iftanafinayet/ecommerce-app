@@ -1,32 +1,36 @@
 import axios from "axios";
 
-const API_BASE_URL = '/api';
+// Instance ini akan otomatis menggunakan proxy yang ada di vite.config.ts
+const API = axios.create({
+  baseURL: '/api', 
+});
 
 export const api = {
   // --- PRODUCTS ---
   products: {
     getAll: async () => {
-      const { data } = await axios.get(`${API_BASE_URL}/products`);
+      // Gunakan API, bukan axios global. Hapus API_BASE_URL.
+      const { data } = await API.get(`/products`);
       return data;
     },
     getById: async (id: string) => {
-      const { data } = await axios.get(`${API_BASE_URL}/products/${id}`);
+      const { data } = await API.get(`/products/${id}`);
       return data;
     },
     create: async (productData: any, token: string) => {
-      const { data } = await axios.post(`${API_BASE_URL}/products`, productData, {
+      const { data } = await API.post(`/products`, productData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
     update: async (id: string, productData: any, token: string) => {
-      const { data } = await axios.put(`${API_BASE_URL}/products/${id}`, productData, {
+      const { data } = await API.put(`/products/${id}`, productData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
     delete: async (id: string, token: string) => {
-      const { data } = await axios.delete(`${API_BASE_URL}/products/${id}`, {
+      const { data } = await API.delete(`/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
@@ -36,15 +40,15 @@ export const api = {
   // --- USERS ---
   users: {
     login: async (email: string, password: string) => {
-      const { data } = await axios.post(`${API_BASE_URL}/users/login`, { email, password });
+      const { data } = await API.post(`/users/login`, { email, password });
       return data;
     },
     register: async (name: string, email: string, password: string) => {
-      const { data } = await axios.post(`${API_BASE_URL}/users`, { name, email, password });
+      const { data } = await API.post(`/users`, { name, email, password });
       return data;
     },
     getProfile: async (token: string) => {
-      const { data } = await axios.get(`${API_BASE_URL}/users/profile`, {
+      const { data } = await API.get(`/users/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
@@ -54,44 +58,37 @@ export const api = {
   // --- ORDERS ---
   orders: {
     create: async (orderData: any, token: string) => {
-      const { data } = await axios.post(`${API_BASE_URL}/orders`, orderData, {
+      const { data } = await API.post(`/orders`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
-getMyOrders: async (token: string) => {
-      // COBA GANTI /mine MENJADI /myorders JIKA 404
-      const { data } = await axios.get(`${API_BASE_URL}/orders/myorders`, {
+    getMyOrders: async (token: string) => {
+      const { data } = await API.get(`/orders/myorders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
     getOrderDetails: async (id: string, token: string) => {
-      const { data } = await axios.get(`${API_BASE_URL}/orders/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return data;
-    },
-    getOrderProgress: async (id: string, token: string) => {
-      const { data } = await axios.get(`${API_BASE_URL}/orders/${id}/progress`, {
+      const { data } = await API.get(`/orders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
     getAllOrders: async (token: string) => {
-      const { data } = await axios.get(`${API_BASE_URL}/orders`, {
+      const { data } = await API.get(`/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
     updateToDelivered: async (id: string, token: string) => {
-      const { data } = await axios.put(`${API_BASE_URL}/orders/${id}/deliver`, {}, {
+      const { data } = await API.put(`/orders/${id}/deliver`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
     deleteOrder: async (id: string, token: string) => {
-      const { data } = await axios.delete(`${API_BASE_URL}/orders/${id}`, {
+      const { data } = await API.delete(`/orders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
