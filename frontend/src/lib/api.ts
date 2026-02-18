@@ -55,6 +55,16 @@ export const api = {
     },
   },
 
+  // --- ADMIN ---
+  admin: {
+    getSummary: async (token : string ) => {
+      const { data } = await API.get('/admin/summary', {
+        headers: { Authorization: 'Bearer ${token}' },
+      });
+      return data;
+    },
+  },
+
   // --- ORDERS ---
   orders: {
     create: async (orderData: any, token: string) => {
