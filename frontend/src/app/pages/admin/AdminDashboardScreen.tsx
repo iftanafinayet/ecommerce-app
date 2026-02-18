@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, ShoppingBag, Package, DollarSign, ArrowUpRight, Loader2 } from 'lucide-react';
 import { api } from '../../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export function AdminDashboardScreen() {
   const { user } = useAuth();
@@ -65,7 +66,7 @@ export function AdminDashboardScreen() {
             <div className="flex justify-between items-start mb-4">
               <div className={`${item.color} p-4 rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 24 })}
-                </div>
+              </div>
               <span className="flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
                 <ArrowUpRight size={12} /> {item.trend}
               </span>
@@ -76,6 +77,59 @@ export function AdminDashboardScreen() {
             </div>
           </motion.div>
         ))}
+      </div>
+
+      {/* Sales Analytics Chart */}
+      <div className="grid grid-cols-1 gap-8 mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40"
+        >
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Sales Analytics</h3>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Tren pendapatan harian</p>
+            </div>
+            <div className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl text-[10px] font-black tracking-widest uppercase">
+              Live Data
+            </div>
+          </div>
+
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={summary?.dailySales || []}>
+                <defs>
+                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 'bold'}}
+                  dy={10}
+                />
+                <YAxis hide={true} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="sales" 
+                  stroke="#10b981" 
+                  strokeWidth={4}
+                  fillOpacity={1} 
+                  fill="url(#colorSales)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
       </div>
 
       {/* Info Section */}

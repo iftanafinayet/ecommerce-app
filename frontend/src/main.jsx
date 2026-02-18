@@ -40,7 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 // Di dalam Routes
 <Route element={<AdminRoot />}>
   {/* Dashboard kita arahkan sementara ke OrderListScreen agar tidak kosong */}
-  <Route path="admin/dashboard" element={<OrderListScreen />} />
+  <Route path="admin/dashboard" element={<AdminDashboardScreen />} />
   
   <Route path="admin/productsList" element={<ProductListScreen />} />
   <Route path="admin/ordersList" element={<OrderListScreen />} />

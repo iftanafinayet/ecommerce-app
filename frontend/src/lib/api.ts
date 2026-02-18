@@ -56,10 +56,13 @@ export const api = {
   },
 
   // --- ADMIN ---
-  admin: {
-    getSummary: async (token : string ) => {
-      const { data } = await API.get('/admin/summary', {
-        headers: { Authorization: 'Bearer ${token}' },
+admin: {
+    getSummary: async (token: string) => {
+      const { data } = await API.get('/orders/summary', {
+        headers: { 
+          // WAJIB: Gunakan backticks (`) bukan tanda kutip (') agar ${token} terbaca
+          'Authorization': `Bearer ${token}` 
+        },
       });
       return data;
     },
