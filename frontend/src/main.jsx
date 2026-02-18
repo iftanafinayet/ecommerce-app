@@ -18,6 +18,7 @@ import { OrderListScreen } from './app/pages/admin/OrderListScreen'
 import { OrderDetailScreen } from './app/pages/OrderDetailScreen'
 import { AuthProvider } from './app/context/AuthContext'
 import './index.css'
+import { AdminDashboardScreen } from './app/pages/admin/AdminDashboardScreen'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
