@@ -7,16 +7,18 @@ import {
   Package, 
   Menu, 
   X, 
-  LayoutDashboard // Tambahkan ini
+  LayoutDashboard,
+  ShieldCheck // Tambahan icon untuk kesan Admin yang kuat
 } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
 import { useCart } from "./context/CartContext";
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion"; // Pastikan framer-motion terinstall
 import { Logo } from "./components/Logo";
 
 export function Navbar() {
-  const { user, logout } = useAuth();
+  // Ambil isAdmin dari context agar lebih bersih
+  const { user, isAdmin, logout } = useAuth(); 
   const { cartItems } = useCart();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +30,7 @@ export function Navbar() {
     if (searchQuery.trim()) {
       navigate(`/?search=${encodeURIComponent(searchQuery)}`);
       setSearchQuery("");
+      setShowMobileMenu(false);
     }
   };
 
@@ -45,8 +48,6 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center group">
             <Logo />
-            <span className="ml-2 text-xl font-bold text-slate-900 group-hover:text-slate-700 transition-colors">
-            </span>
           </Link>
 
           {/* Desktop Search Bar */}
@@ -55,17 +56,16 @@ export function Navbar() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input
                 type="text"
-                placeholder="Search for products..."
+                placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent focus:bg-white transition-all"
+                className="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
               />
             </div>
           </form>
 
           {/* Desktop User Actions */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Cart Icon */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -74,29 +74,22 @@ export function Navbar() {
             >
               <ShoppingCart size={22} className="text-slate-900" />
               {cartItemCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg"
-                >
+                <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
                   {cartItemCount}
-                </motion.span>
+                </span>
               )}
             </motion.button>
 
-            {/* Auth Condition */}
             {user ? (
               <div className="relative">
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
                   className="flex items-center gap-2 px-4 py-2 hover:bg-slate-100 rounded-full transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full flex items-center justify-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isAdmin ? 'bg-emerald-600' : 'bg-slate-900'}`}>
                     <User size={18} className="text-white" />
                   </div>
-                  <span className="text-slate-900 font-medium">{user.name}</span>
+                  <span className="text-slate-900 font-bold">{user.name}</span>
                 </motion.button>
 
                 <AnimatePresence>
@@ -105,61 +98,105 @@ export function Navbar() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-60 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/50 py-2 overflow-hidden"
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 overflow-hidden"
                     >
-                      {/* --- MENU ADMIN (Hanya tampil jika isAdmin) --- */}
-                      {user && user.isAdmin && (
-                        <Link
-                          to="/admin/productsList"
-                          className="flex items-center gap-3 px-4 py-3 text-emerald-600 font-bold hover:bg-emerald-50 transition-colors border-b border-slate-100"
-                          onClick={() => setShowUserDropdown(false)}
-                        >
-                          <LayoutDashboard size={18} />
-                          <span>Admin Dashboard</span>
-                        </Link>
+                      {/* Admin Section */}
+                      {isAdmin && (
+                        <div className="px-4 py-2 mb-2 bg-emerald-50/50">
+                          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Admin Panel</p>
+                          <Link
+                            to="/admin/productsList"
+                            className="flex items-center gap-3 p-2 text-slate-900 hover:bg-white rounded-xl transition-all font-bold text-sm"
+                            onClick={() => setShowUserDropdown(false)}
+                          >
+                            <LayoutDashboard size={18} className="text-emerald-600" />
+                            Dashboard Produk
+                          </Link>
+                        </div>
                       )}
+
+                      <p className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Account</p>
+                      <Link to="/profile" className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 font-bold text-sm" onClick={() => setShowUserDropdown(false)}>
+                        <User size={18} /> Profile
+                      </Link>
+                      <Link to="/orders" className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 font-bold text-sm" onClick={() => setShowUserDropdown(false)}>
+                        <Package size={18} /> My Orders
+                      </Link>
+                      
+                      <hr className="my-2 border-slate-100" />
+                      
                       <button
-                        onClick={() => {
-                          logout();
-                          setShowUserDropdown(false);
-                          navigate("/");
-                        }}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-rose-600 hover:bg-rose-50 transition-colors"
+                        onClick={() => { logout(); setShowUserDropdown(false); }}
+                        className="flex items-center gap-3 w-full px-6 py-3 text-rose-600 hover:bg-rose-50 font-bold text-sm transition-colors"
                       >
-                        <LogOut size={18} />
-                        <span>Logout</span>
+                        <LogOut size={18} /> Logout
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="px-5 py-2 text-slate-900 hover:bg-slate-100 rounded-full transition-colors font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-5 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-full transition-all font-medium shadow-lg shadow-slate-900/20"
-                >
-                  Register
-                </Link>
+              <div className="flex items-center gap-2 pl-4">
+                <Link to="/login" className="text-sm font-bold text-slate-600 hover:text-slate-900">Login</Link>
+                <Link to="/register" className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all">Register</Link>
               </div>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="md:hidden p-2 hover:bg-slate-100 rounded-lg"
-          >
-            {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden flex items-center gap-4">
+            <button onClick={() => navigate("/cart")} className="relative p-2">
+              <ShoppingCart size={24} />
+              {cartItemCount > 0 && <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">{cartItemCount}</span>}
+            </button>
+            <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="p-2 text-slate-900">
+              {showMobileMenu ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
+          >
+            <div className="p-4 space-y-4">
+              <form onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full px-5 py-3 bg-slate-100 rounded-2xl font-bold outline-none"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+              
+              {user ? (
+                <div className="space-y-2">
+                  {isAdmin && (
+                    <Link to="/admin/productsList" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 rounded-2xl font-bold">
+                      <ShieldCheck size={20} /> Admin Dashboard
+                    </Link>
+                  )}
+                  <Link to="/profile" onClick={() => setShowMobileMenu(false)} className="block p-4 font-bold text-slate-700">Profile</Link>
+                  <Link to="/orders" onClick={() => setShowMobileMenu(false)} className="block p-4 font-bold text-slate-700">My Orders</Link>
+                  <button onClick={logout} className="w-full text-left p-4 font-bold text-rose-600">Logout</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 p-2">
+                  <Link to="/login" onClick={() => setShowMobileMenu(false)} className="text-center py-4 font-bold border border-slate-200 rounded-2xl">Login</Link>
+                  <Link to="/register" onClick={() => setShowMobileMenu(false)} className="text-center py-4 font-bold bg-slate-900 text-white rounded-2xl">Register</Link>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 }

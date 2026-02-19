@@ -1,15 +1,26 @@
 import axios from "axios";
 
-// Instance ini akan otomatis menggunakan proxy yang ada di vite.config.ts
+// 1. Definisikan URL Backend secara eksplisit agar tidak tertukar dengan port Vite (5173)
+const BASE_URL = "http://localhost:5000";
+
 const API = axios.create({
-  baseURL: '/api', 
+  baseURL: `${BASE_URL}/api`, 
 });
+
+// Helper untuk mengambil URL Gambar dari folder uploads
+export const getImageUrl = (path: string) => {
+  if (!path) return "https://placehold.co/100x100?text=No+Image";
+  // Jika path sudah berupa URL (cloudinary/internet), langsung kembalikan
+  if (path.startsWith('http')) return path;
+  // Jika path lokal, gabungkan dengan URL Backend (Pastikan path diawali /)
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${BASE_URL}${cleanPath}`;
+};
 
 export const api = {
   // --- PRODUCTS ---
   products: {
     getAll: async () => {
-      // Gunakan API, bukan axios global. Hapus API_BASE_URL.
       const { data } = await API.get(`/products`);
       return data;
     },
@@ -53,20 +64,23 @@ export const api = {
       });
       return data;
     },
-  },
-
-  // --- ADMIN ---
-admin: {
-    getSummary: async (token: string) => {
-      const { data } = await API.get('/orders/summary', {
-        headers: { 
-          // WAJIB: Gunakan backticks (`) bukan tanda kutip (') agar ${token} terbaca
-          'Authorization': `Bearer ${token}` 
-        },
+    updateProfile: async (userData: any, token: string) => {
+      const { data } = await API.put(`/users/profile`, userData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       return data;
     },
   },
+
+  // --- ADMIN ---
+  admin: {
+  getSummary: async (token: string) => {
+    const response = await axios.get(`${BASE_URL}/api/orders/summary`, { // Pastikan /orders/summary
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  }
+},
 
   // --- ORDERS ---
   orders: {
@@ -106,5 +120,6 @@ admin: {
       });
       return data;
     },
+    
   },
 };

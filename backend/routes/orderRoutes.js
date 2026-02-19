@@ -1,75 +1,67 @@
 import express from 'express';
+import asyncHandler from 'express-async-handler';
 import Order from '../models/orderModel.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 import User from '../models/userModel.js';
 import Product from '../models/productModel.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+
 
 const router = express.Router();
 
-// @desc    Get order summary for dashboard
-// @route   GET /api/orders/summary
-router.get('/summary', protect, admin, async (req, res) => {
-  try {
-    // 1. Ambil Statistik Utama
-    const ordersStats = await Order.aggregate([
-      {
-        $group: {
-          _id: null,
-          numOrders: { $sum: 1 },
-          totalSales: { $sum: '$totalPrice' },
-        },
-      },
-    ]);
+// 1. Ambil SEMUA pesanan (Hanya untuk Admin)
+// Endpoint: GET /api/orders
+router.get('/', protect, admin, asyncHandler(async (req, res) => {
+  // .populate('user', 'id name') berfungsi mengambil info nama pembeli dari tabel User
+  const orders = await Order.find({}).populate('user', 'id name');
+  res.json(orders);
+}));
 
-    // 2. Ambil Data Penjualan 7 Hari Terakhir untuk Grafik
-    const dailySales = await Order.aggregate([
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          sales: { $sum: '$totalPrice' },
-        },
-      },
-      { $sort: { _id: 1 } },
-      { $limit: 7 }
-    ]);
+// 2. Ambil pesanan milik user yang sedang login
+router.get('/myorders', protect, asyncHandler(async (req, res) => {
+  const orders = await Order.find({ user: req.user._id });
+  res.json(orders);
+}));
 
-    const numUsers = await User.countDocuments();
-    const numProducts = await Product.countDocuments();
+// 3. Summary Dashboard (PENTING untuk grafik)
+router.get('/summary', protect, admin, asyncHandler(async (req, res) => {
+  const orders = await Order.find({});
+  const users = await User.countDocuments();
+  const products = await Product.countDocuments();
+  
+  const totalSales = orders.reduce((acc, item) => acc + item.totalPrice, 0);
 
-    res.json({
-      users: numUsers,
-      orders: ordersStats.length === 0 ? 0 : ordersStats[0].numOrders,
-      totalSales: ordersStats.length === 0 ? 0 : ordersStats[0].totalSales,
-      products: numProducts,
-      dailySales: dailySales.map(item => ({ name: item._id, sales: item.sales }))
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+  // Simulasi data harian untuk grafik (atau gunakan agregasi MongoDB)
+  const dailySales = [
+    { name: 'Mon', sales: 4000 },
+    { name: 'Tue', sales: 3000 },
+    { name: 'Wed', sales: 5000 },
+    { name: 'Thu', sales: 2780 },
+    { name: 'Fri', sales: 1890 },
+    { name: 'Sat', sales: 2390 },
+    { name: 'Sun', sales: 3490 },
+  ];
 
-// @desc    Ambil semua pesanan (Admin)
-router.get('/', protect, admin, async (req, res) => {
-  try {
-    const orders = await Order.find({}).populate('user', 'id name');
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+  res.json({
+    users,
+    orders: orders.length,
+    products,
+    totalSales,
+    dailySales
+  });
+}));
 
-// @desc    Get order by ID (Taruh di bawah /summary)
-router.get('/:id', protect, async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id).populate('user', 'name email');
-    if (order) {
-      res.json(order);
-    } else {
-      res.status(404).json({ message: 'Order tidak ditemukan' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// 4. Create Order
+router.post('/', protect, asyncHandler(async (req, res) => {
+  const { orderItems, shippingAddress, paymentMethod, totalPrice } = req.body;
+  const order = new Order({
+    user: req.user._id,
+    orderItems,
+    shippingAddress,
+    paymentMethod,
+    totalPrice,
+  });
+  const createdOrder = await order.save();
+  res.status(201).json(createdOrder);
+}));
 
 export default router;

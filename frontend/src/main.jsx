@@ -19,6 +19,7 @@ import { OrderDetailScreen } from './app/pages/OrderDetailScreen'
 import { AuthProvider } from './app/context/AuthContext'
 import './index.css'
 import { AdminDashboardScreen } from './app/pages/admin/AdminDashboardScreen'
+import { UserProfile } from './app/pages/UserProfile'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -35,6 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="checkout" element={<Checkout />} />
           <Route path="orders" element={<MyOrders />} />
           <Route path="order/:id" element={<OrderDetailScreen />} />
+          <Route path="profile" element={<UserProfile />} />
         </Route>
 
         {/* LAYOUT ADMIN */}

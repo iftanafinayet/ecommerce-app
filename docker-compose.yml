@@ -1,31 +1,45 @@
 version: '3.8'
 
-services: # <-- Pastikan ini ada dan semua service menjorok ke dalam
+services:
   mongodb:
     image: mongo:latest
+    container_name: mongodb-merchify
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - merchify-net
 
   backend:
     build: ./backend
+    container_name: backend-merchify
     ports:
       - "5000:5000"
     environment:
       - MONGO_URI=mongodb+srv://fincaanaya:Basketismylife123@cluster0.1cad5ok.mongodb.net/toko_online?retryWrites=true&w=majority&appName=Cluster0
       - JWT_SECRET=rahasia_super_kuat_123
+      - NODE_ENV=development
     depends_on:
       - mongodb
+    networks:
+      - merchify-net
 
-  frontend: # <-- Sekarang ini berada di bawah 'services'
+  frontend:
     build: ./frontend
+    container_name: frontend-merchify
     ports:
       - "5173:5173"
     stdin_open: true
     tty: true
     depends_on:
       - backend
+    networks:
+      - merchify-net
 
-volumes: # <-- Ini kembali ke baris paling depan (root)
+networks:
+  merchify-net:
+    driver: bridge
+
+volumes:
   mongo-data:

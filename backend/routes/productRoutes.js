@@ -1,30 +1,32 @@
-import express from "express";
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import { protect, admin } from '../middleware/authMiddleware.js';
 import { 
-  createProduct, 
-  deleteProduct, 
-  getProductById, 
-  getProducts, 
-  updateProduct 
-} from "../controllers/productController.js";
-import { protect, admin } from "../middleware/authMiddleware.js";
+  getProducts, getProductById, createProduct, updateProduct, deleteProduct 
+} from '../controllers/productController.js';
 
 const router = express.Router();
 
-/**
- * @route   GET & POST /api/products
- * @desc    Get all products or Create a new product (Admin Only)
- */
+// Konfigurasi Multer
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'uploads/'); // Gambar disimpan di folder uploads/
+  },
+  filename(req, file, cb) {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({ storage });
+
 router.route('/')
   .get(getProducts)
-  .post(protect, admin, createProduct);
+  .post(protect, admin, upload.single('image'), createProduct); // Support upload
 
-/**
- * @route   GET, PUT, & DELETE /api/products/:id
- * @desc    Get single product, Update, or Delete product (Admin Only)
- */
 router.route('/:id')
   .get(getProductById)
-  .put(protect, admin, updateProduct)
+  .put(protect, admin, upload.single('image'), updateProduct) // Support update gambar
   .delete(protect, admin, deleteProduct);
 
 export default router;

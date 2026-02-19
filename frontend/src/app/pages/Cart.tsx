@@ -119,7 +119,7 @@ export function Cart() {
                         </motion.button>
                       </div>
                       <div className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        Rp {(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -143,7 +143,7 @@ export function Cart() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-slate-600">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-slate-900">${total.toFixed(2)}</span>
+                  <span className="font-semibold text-slate-900">Rp {total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Shipping</span>
@@ -153,7 +153,7 @@ export function Cart() {
                   <div className="flex justify-between items-baseline">
                     <span className="font-semibold text-slate-900">Total</span>
                     <span className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                      ${total.toFixed(2)}
+                      Rp {total.toFixed(2)}
                     </span>
                   </div>
                 </div>
