@@ -1,0 +1,12 @@
+docker-compose.yml
+*.log
+*.env
+*.pyc
+__pycache__/
+venv/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*.bak       
+
