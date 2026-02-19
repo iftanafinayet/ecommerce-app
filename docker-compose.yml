@@ -17,8 +17,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb+srv://fincaanaya:Basketismylife123@cluster0.1cad5ok.mongodb.net/toko_online?retryWrites=true&w=majority&appName=Cluster0
-      - JWT_SECRET=rahasia_super_kuat_123
+      - MONGO_URI=
+      - JWT_SECRET=
       - NODE_ENV=development
     depends_on:
       - mongodb
